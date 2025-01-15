@@ -24,7 +24,7 @@ export const BackgroundBottom = styled.div`
   left: 0;
   width: 100%;
   height: 50%;
-  background-color: teal;
+  background-color: white;
   z-index: -1;
 `;
 
@@ -38,8 +38,8 @@ export const LoginBox = styled.div`
 
 export const Form = styled.form`
   display: flex;
-  flex-direction: column; /* Adiciona esta linha para empilhar os inputs verticalmente */
-  align-items: stretch; /* Certifique-se de que os inputs ocupem toda a largura disponível */
+  flex-direction: column;
+  margin: 10px 0px
 `;
 
 export const Input = styled.input`
@@ -68,3 +68,19 @@ export const Button = styled.button`
     background-color: darkcyan;
   }
 `;
+
+export const LoginText = styled.span`
+  font-size: 32px;
+  color: teal;
+  margin-bottom: 10px;
+`;
+
+export const RegisterText = styled.a`
+  color: teal;
+  font-size: 14px;
+
+  span {
+    color: black;
+  }
+`;
+

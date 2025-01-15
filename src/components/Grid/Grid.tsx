@@ -1,41 +1,45 @@
 import React from "react";
-import GridItem from "../GridItem/GridItem";
 import * as C from "./styles";
-import { api } from "../../api";
-
-interface Transaction {
-  id: number;
-  desc: string;
-  amount: number;
-  expense: boolean;
-}
+import GridItem from "../GridItem/GridItem";
 
 interface GridProps {
-  itens: Transaction[];
+  items: {
+    id: number;
+    name: string;
+    description: string;
+    image: string;
+    value: number;
+    quantity: number;
+  }[];
+  onDelete: (id: number) => void;
 }
 
-const Grid: React.FC<GridProps> = ({ itens }) => {
-  const onDelete = async (ID: number) => {
-    await api.delete(`/transacoes/${ID}`);
-    window.location.reload();
-  };
-
+const Grid: React.FC<GridProps> = ({ items, onDelete }) => {
   return (
-    <table className="table">
-      <thead className="thead">
-        <tr className="tr">
-          <th className="th" style={{ width: "40%" }}>Descrição</th>
-          <th className="th" style={{ width: "40%" }}>Valor</th>
-          <th className="th" style={{ width: "10%", textAlign: "center" }}>Tipo</th>
-          <th className="th" style={{ width: "10%" }}></th>
-        </tr>
-      </thead>
-      <tbody className="tbody">
-        {itens?.map((item) => (
-          <GridItem key={item.id} item={item} onDelete={onDelete} />
-        ))}
-      </tbody>
-    </table>
+    <C.Container>
+      <C.Table>
+        <C.Thead>
+          <tr>
+            <th>Nome</th>
+            <th>Descrição</th>
+            <th>Imagem</th>
+            <th>Valor</th>
+            <th>Quantidade</th>
+            <th>Ações</th>
+          </tr>
+        </C.Thead>
+        <C.Tbody>
+          {items.map((item) => (
+            <GridItem key={item.id} item={item} onDelete={onDelete} />
+          ))}
+        </C.Tbody>
+      </C.Table>
+      {items.length === 0 && (
+        <C.EmptyProductsContainer>
+          <C.EmptyProductsText>Nenhum produto cadastrado.</C.EmptyProductsText>
+        </C.EmptyProductsContainer>
+      )}
+    </C.Container>
   );
 };
 

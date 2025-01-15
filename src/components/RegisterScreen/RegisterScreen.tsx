@@ -7,16 +7,14 @@ const RegisterScreen: React.FC = () => {
   const [name, setName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  const [age, setAge] = useState<number>(0);
   const navigate = useNavigate();
 
   async function Register() {
     try {
-      const res = await api.post("/register", {
+      await api.post("/users/register", {
         email,
         password,
         name,
-        age: Number(age),
       });
       alert("Usuário criado com sucesso!");
       navigate("/login");
@@ -32,7 +30,12 @@ const RegisterScreen: React.FC = () => {
       <C.BackgroundBottom />
       <C.RegisterBox>
         <C.Title>Cadastro</C.Title>
-        <C.Form onSubmit={(e) => { e.preventDefault(); Register(); }}>
+        <C.Form
+          onSubmit={(e) => {
+            e.preventDefault();
+            Register();
+          }}
+        >
           <C.Input
             type="text"
             placeholder="Nome"
@@ -46,13 +49,6 @@ const RegisterScreen: React.FC = () => {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-          />
-          <C.Input
-            type="number"
-            placeholder="Idade"
-            required
-            value={age}
-            onChange={(e) => setAge(Number(e.target.value))}
           />
           <C.Input
             type="password"

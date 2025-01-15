@@ -10,7 +10,7 @@ const LoginScreen: React.FC = () => {
 
   async function Login() {
     try {
-      const res = await api.post("/login", {
+      const res = await api.post("/users/login", {
         email,
         password,
       });
@@ -28,8 +28,13 @@ const LoginScreen: React.FC = () => {
       <C.BackgroundTop />
       <C.BackgroundBottom />
       <C.LoginBox>
-        <h2 className="title">Login</h2>
-        <C.Form onSubmit={(e) => { e.preventDefault(); Login(); }}>
+        <C.LoginText>Login</C.LoginText>
+        <C.Form
+          onSubmit={(e) => {
+            e.preventDefault();
+            Login();
+          }}
+        >
           <C.Input
             type="email"
             value={email}
@@ -46,9 +51,12 @@ const LoginScreen: React.FC = () => {
           />
           <C.Button type="submit">Entrar</C.Button>
         </C.Form>
-        <div className="registerLink">
-          Não tem uma conta? <Link to="/register">Cadastre-se</Link>
-        </div>
+        <C.RegisterText>
+          <span>Não tem uma conta? </span>
+          <Link to="/register" style={{ color: "teal" }}>
+            Cadastre-se
+          </Link>
+        </C.RegisterText>
       </C.LoginBox>
     </C.Container>
   );

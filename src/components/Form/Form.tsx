@@ -1,86 +1,143 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import Modal from "react-modal";
 import Grid from "../Grid/Grid";
 import * as C from "./styles";
+import { api } from "../../api";
 
-interface Transaction {
+interface Product {
   id: number;
-  desc: string;
-  amount: number;
-  expense: boolean;
+  name: string;
+  description: string;
+  image: string;
+  value: number;
+  quantity: number;
 }
 
 interface FormProps {
-  handleAdd: (transaction: Transaction) => void;
-  transactionsList: Transaction[];
-  setTransactionsList: React.Dispatch<React.SetStateAction<Transaction[]>>;
+  productsList: Product[];
+  setProductsList: React.Dispatch<React.SetStateAction<Product[]>>;
 }
 
-const Form: React.FC<FormProps> = ({ handleAdd, transactionsList, setTransactionsList }) => {
-  const [desc, setDesc] = useState<string>("");
-  const [amount, setAmount] = useState<string>("");
-  const [isExpense, setExpense] = useState<boolean>(false);
+const Form: React.FC<FormProps> = ({ productsList, setProductsList }) => {
+  const [name, setName] = useState<string>("");
+  const [description, setDescription] = useState<string>("");
+  const [image, setImage] = useState<string>("");
+  const [value, setValue] = useState<string>("");
+  const [quantity, setQuantity] = useState<string>("");
+  const [modalIsOpen, setModalIsOpen] = useState<boolean>(false);
 
-  const generateID = () => Math.round(Math.random() * 1000);
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await api.get<Product[]>("/products/");
+        setProductsList(response.data);
+      } catch (err) {
+        console.error("Erro ao buscar produtos:", err);
+        alert("Não foi possível carregar os produtos.");
+      }
+    };
 
-  const handleSave = () => {
-    if (!desc || !amount) {
-      alert("Informe a descrição e o valor!");
+    fetchProducts();
+  }, [setProductsList]);
+
+  const handleSave = async () => {
+    if (!name || !description || !image || !value || !quantity) {
+      alert("Preencha todos os campos!");
       return;
-    } else if (Number(amount) < 1) {
-      alert("O valor tem que ser positivo!");
+    } else if (Number(value) < 1 || Number(quantity) < 1) {
+      alert("O valor e a quantidade devem ser positivos!");
       return;
     }
 
-    const transaction = {
-      id: generateID(),
-      desc,
-      amount: Number(amount),
-      expense: isExpense,
+    const product = {
+      name,
+      description,
+      image,
+      value: Number(value),
+      quantity: Number(quantity),
     };
 
-    handleAdd(transaction);
-    setDesc("");
-    setAmount("");
+    try {
+      const response = await api.post("/products/register", product);
+      setProductsList((prev) => [...prev, response.data]);
+      alert("Produto salvo com sucesso!");
+    } catch (err) {
+      console.error("Erro ao salvar produto:", err);
+      alert("Não foi possível salvar o produto.");
+    }
+
+    setName("");
+    setDescription("");
+    setImage("");
+    setValue("");
+    setQuantity("");
+    setModalIsOpen(false);
+  };
+
+  const handleDelete = async (id: number) => {
+    try {
+      await api.delete(`/products/${id}`);
+      setProductsList((prev) => prev.filter((product) => product.id !== id));
+      alert("Produto deletado com sucesso!");
+    } catch (err) {
+      console.error("Erro ao deletar produto:", err);
+      alert("Não foi possível deletar o produto.");
+    }
   };
 
   return (
     <>
-      <C.Container>
-        <C.InputContent>
-          <label>Categoria</label>
-          <C.Input
-            value={desc}
-            onChange={(e) => setDesc(e.target.value)}
-          />
-        </C.InputContent>
-        <C.InputContent>
-          <label>Valor</label>
-          <C.Input
-            value={amount}
-            type="number"
-            onChange={(e) => setAmount(e.target.value)}
-          />
-        </C.InputContent>
-        <C.RadioGroup>
-          <input
-            type="radio"
-            id="rIncome"
-            defaultChecked
-            name="group1"
-            onChange={() => setExpense(!isExpense)}
-          />
-          <label htmlFor="rIncome">Entrada</label>
-          <input
-            type="radio"
-            id="rExpenses"
-            name="group1"
-            onChange={() => setExpense(!isExpense)}
-          />
-          <label htmlFor="rExpenses">Saída</label>
-        </C.RadioGroup>
-        <C.Button onClick={handleSave}>ADICIONAR</C.Button>
-      </C.Container>
-      <Grid itens={transactionsList} setItens={setTransactionsList} />
+      <C.FloatingButton onClick={() => setModalIsOpen(true)}>
+        +
+      </C.FloatingButton>
+      <Modal
+        isOpen={modalIsOpen}
+        onRequestClose={() => setModalIsOpen(false)}
+        style={{
+          overlay: { backgroundColor: "transparent" },
+          content: { padding: 0, inset: "unset" },
+        }}
+      >
+        <C.ModalOverlay>
+          <C.ModalContent>
+            <C.Input
+              type="text"
+              placeholder="Nome"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+            <C.Input
+              type="text"
+              placeholder="Descrição"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+            <C.Input
+              type="text"
+              placeholder="Imagem (URL)"
+              value={image}
+              onChange={(e) => setImage(e.target.value)}
+            />
+            <C.Input
+              type="number"
+              placeholder="Valor"
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
+            />
+            <C.Input
+              type="number"
+              placeholder="Quantidade"
+              value={quantity}
+              onChange={(e) => setQuantity(e.target.value)}
+            />
+            <C.Button onClick={handleSave}>Salvar</C.Button>
+            <C.ButtonOutlined onClick={() => setModalIsOpen(false)}>
+              Cancelar
+            </C.ButtonOutlined>
+          </C.ModalContent>
+        </C.ModalOverlay>
+      </Modal>
+      <Grid items={productsList} onDelete={handleDelete} />
     </>
   );
 };
